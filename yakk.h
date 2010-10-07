@@ -27,6 +27,7 @@ typedef struct {
 	int state;//ready = 1, not ready = 0
 	int first_time; //=1 if it hasn't run yet. = 0 if it has.
 	int tickNum;
+	void (* task)();
 } TCB;
 
 

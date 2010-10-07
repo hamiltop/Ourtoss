@@ -34,6 +34,7 @@ typedef struct {
  int state;
  int first_time;
  int tickNum;
+ void (* task)();
 } TCB;
 
 
@@ -75,7 +76,8 @@ void YKInitialize(){
  YKIdleCount = 0;
  YKCtxSwCount = 0;
  isrdepth = 0;
- YKNewTask(Idle, (void *)&IdleStk[256],100);
+ YKNewTask(Idle, (void *)&IdleStk[256],99);
+ current_task = &tasks[99];
 }
 
 void Idle(void) {
@@ -84,6 +86,7 @@ void Idle(void) {
 
 void YKNewTask(void (* task)(void),void *taskStack, unsigned char priority){
  TCB * newTCB = &(tasks[priority]);
+ newTCB->task = task;
  newTCB->id = id_counter++;
  newTCB->state = 1;
  newTCB->first_time = 1;
@@ -135,8 +138,10 @@ void YKDispatcher(TCB * task_to_execute) {
  current_task = task_to_execute;
  if(task_to_execute->first_time) {
   task_to_execute->first_time = 0;
+ } else {
   restoreContext(&(task_to_execute->context));
  }
+ task_to_execute->task();
  return;
 }
 

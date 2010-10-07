@@ -64,6 +64,7 @@ typedef struct {
  int state;
  int first_time;
  int tickNum;
+ void (* task)();
 } TCB;
 
 

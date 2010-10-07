@@ -62,7 +62,7 @@ ATask:
 	jmp	L_lab4b_app_10
 L_lab4b_app_11:
 	; >>>>> Line:	35
-	; >>>>>  
+	; >>>>> printString("Task A started!\n"); 
 	mov	ax, L_lab4b_app_6
 	push	ax
 	call	printString
@@ -158,7 +158,7 @@ CTask:
 	jmp	L_lab4b_app_20
 L_lab4b_app_21:
 	; >>>>> Line:	58
-	; >>>>> YKEnterMute 
+	; >>>>> YKEnterMutex(); 
 	call	YKEnterMutex
 	; >>>>> Line:	59
 	; >>>>> numCtxSwitches = YKCtxSwCount; 
