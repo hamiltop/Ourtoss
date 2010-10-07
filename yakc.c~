@@ -33,7 +33,11 @@ void YKRun(){
 	YKScheduler();
 }
 void YKDelayTask(unsigned count){
-	current_task->tickNum = YKTickNum +count;
+	int x = YKTickNum + count;
+	while(true){
+		if (YKTickNum > x )
+			return;
+	}
 }
 void YKEnterMutex(){
 	asm(cli);
