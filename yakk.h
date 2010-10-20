@@ -18,7 +18,7 @@ typedef struct {
 	int ss;
 	int es;
 	
-//	int flags;	
+	int flags;	
 } Context;
 
 typedef struct {

@@ -28,11 +28,14 @@ void Idle(void) {
 }
 
 void YKNewTask(void (* task)(void),void *taskStack, unsigned char priority){
+	
 	TCB * newTCB = &(tasks[priority]);
 	newTCB->task = task;
 	newTCB->id = id_counter++;
 	newTCB->state = 1;
 	newTCB->first_time = 1;
+	newTCB->context->sp = taskStack;
+	newTCB->context->bp = taskStack;
 	// initialize variables in TCB
 	tasks[priority] = *newTCB;
 	if (running) YKScheduler();
@@ -81,15 +84,19 @@ void YKDispatcher(TCB * task_to_execute) {
 	current_task = task_to_execute;
 	if(task_to_execute->first_time) {
 		task_to_execute->first_time = 0;
+		restoreContext(&(task_to_execute->context));
+		task_to_execute->task();
 	} else {
 		restoreContext(&(task_to_execute->context));
 	}
-	task_to_execute->task();
 	return;
 }
 
 void saveContext(Context * context) {
 	int tempreg;
+	asm("pushf");
+	asm("mov word [bp-2], [sp]");
+	context->flags = tempreg;
 	asm("mov word [bp-2], ax");
 	context->ax = tempreg;
 	asm("mov word [bp-2], bx");
@@ -146,6 +153,10 @@ void restoreContext(Context * context) {
 	asm("mov word es, [bp-2]");
 	tempreg = context->bp ;
 	asm("mov word bp, [bp-2]");
+	tempreg = context->flags;
+	asm("push [bp-2]");
+	asm("popf");
+	
 }
 
 void YKTickHandler() {
