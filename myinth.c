@@ -9,8 +9,9 @@ void reset(void) {
 void tick(void) {
 	printNewLine();
 	printString("TICK ");       // Print string
-	printInt(tickCount++);
+	printInt(++tickCount);
 	printNewLine();
+	YKTickHandler();
 }
 
 void key(void) {

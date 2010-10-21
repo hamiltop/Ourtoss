@@ -7,7 +7,7 @@ typedef struct {
 	int cx;
 	int dx;
 	
-//	int ip;
+	int ip;
 	int sp;
 	int bp;
 	int si;
@@ -41,9 +41,9 @@ void YKEnterMutex();
 void YKExitMutex();
 void YKEnterISR();
 void YKExitISR();
-void YKScheduler();
-void YKDispatcher(TCB * task_to_execute);
-void saveContext(Context * context);
+void YKScheduler(int old_ip);
+void YKDispatcher(TCB * task_to_execute,int old_ip);
+void saveContext(Context * context,int old_ip);
 void restoreContext(Context * context);
 void YKTickHandler(void);
 

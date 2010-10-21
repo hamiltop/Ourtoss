@@ -42,15 +42,19 @@ L_myinth_6:
 	call	printString
 	add	sp, 2
 	; >>>>> Line:	12
-	; >>>>> printInt(tickCount++); 
+	; >>>>> printInt(++tickCount); 
 	mov	ax, word [tickCount]
-	inc	word [tickCount]
+	inc	ax
+	mov	word [tickCount], ax
 	push	ax
 	call	printInt
 	add	sp, 2
 	; >>>>> Line:	13
 	; >>>>> printNewLine(); 
 	call	printNewLine
+	; >>>>> Line:	14
+	; >>>>> YKTickHandler(); 
+	call	YKTickHandler
 	mov	sp, bp
 	pop	bp
 	ret
@@ -68,35 +72,35 @@ L_myinth_8:
 	DB	"DELAY KEY PRESSED ",0
 	ALIGN	2
 key:
-	; >>>>> Line:	16
+	; >>>>> Line:	17
 	; >>>>> void key(void) { 
 	jmp	L_myinth_12
 L_myinth_13:
-	; >>>>> Line:	18
+	; >>>>> Line:	19
 	; >>>>> asm ("cli"); 
 	cli
-	; >>>>> Line:	19
+	; >>>>> Line:	20
 	; >>>>> switch(KeyBuffer) { 
 	mov	ax, word [KeyBuffer]
 	sub	ax, 100
 	jne	L_myinth_15
 L_myinth_16:
-	; >>>>> Line:	21
+	; >>>>> Line:	22
 	; >>>>> asm("sti"); 
 	sti
-	; >>>>> Line:	22
+	; >>>>> Line:	23
 	; >>>>> printNewLine(); 
 	call	printNewLine
-	; >>>>> Line:	23
+	; >>>>> Line:	24
 	; >>>>> printString("DELAY KEY PRESSED "); 
 	mov	ax, L_myinth_8
 	push	ax
 	call	printString
 	add	sp, 2
-	; >>>>> Line:	24
+	; >>>>> Line:	25
 	; >>>>> printNewLine(); 
 	call	printNewLine
-	; >>>>> Line:	25
+	; >>>>> Line:	26
 	; >>>>> for(i=0;i<5000;i++); 
 	mov	word [bp-2], 0
 	jmp	L_myinth_18
@@ -107,44 +111,44 @@ L_myinth_18:
 	cmp	word [bp-2], 5000
 	jl	L_myinth_17
 L_myinth_19:
-	; >>>>> Line:	26
+	; >>>>> Line:	27
 	; >>>>> printString("DELAY COMPLETE "); 
 	mov	ax, L_myinth_9
 	push	ax
 	call	printString
 	add	sp, 2
-	; >>>>> Line:	27
+	; >>>>> Line:	28
 	; >>>>> printNewLine(); 
 	call	printNewLine
-	; >>>>> Line:	28
+	; >>>>> Line:	29
 	; >>>>> break; 
 	jmp	L_myinth_14
 L_myinth_15:
-	; >>>>> Line:	30
+	; >>>>> Line:	31
 	; >>>>> printNewLine(); 
 	call	printNewLine
-	; >>>>> Line:	31
+	; >>>>> Line:	32
 	; >>>>> printString("KEYPRESS ("); 
 	mov	ax, L_myinth_10
 	push	ax
 	call	printString
 	add	sp, 2
-	; >>>>> Line:	32
+	; >>>>> Line:	33
 	; >>>>> printChar(KeyBuffer); 
 	push	word [KeyBuffer]
 	call	printChar
 	add	sp, 2
-	; >>>>> Line:	33
-	; >>>>> printString(") IGNORED"); 
+	; >>>>> Line:	34
+	; >>>>> printStrin 
 	mov	ax, L_myinth_11
 	push	ax
 	call	printString
 	add	sp, 2
-	; >>>>> Line:	34
-	; >>>>>  
+	; >>>>> Line:	35
+	; >>>>> printNewLine(); 
 	call	printNewLine
 L_myinth_14:
-	; >>>>> Line:	37
+	; >>>>> Line:	38
 	; >>>>> asm("sti"); 
 	sti
 	mov	sp, bp

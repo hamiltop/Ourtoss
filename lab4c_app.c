@@ -33,9 +33,12 @@ void Task(void)
     while (1)
     {
         printString("Delaying task...\n");
+	Dummy();
 
         YKDelayTask(2);
 
+	Dummy();
+	
         YKEnterMutex();
         numCtxSwitches = YKCtxSwCount;
         idleCount = YKIdleCount;
