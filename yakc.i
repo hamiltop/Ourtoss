@@ -26,6 +26,7 @@ typedef struct {
  int es;
 
  int flags;
+ int tstamp;
 } Context;
 
 typedef struct {
@@ -34,6 +35,7 @@ typedef struct {
  int state;
  int first_time;
  int tickNum;
+
  void (* task)();
 } TCB;
 
@@ -48,14 +50,15 @@ void YKEnterMutex();
 void YKExitMutex();
 void YKEnterISR();
 void YKExitISR();
-void YKScheduler(int old_ip);
-void YKDispatcher(TCB * task_to_execute,int old_ip);
-void saveContext(Context * context,int old_ip);
+void YKScheduler();
+void YKDispatcher(TCB * task_to_execute);
+void saveContext(Context * context);
 void restoreContext(Context * context);
 void YKTickHandler(void);
 
 extern int YKCtxSwCount;
 extern int YKIdleCount;
+extern int YKTickNum;
 # 3 "yakc.c" 2
 
 
@@ -76,14 +79,14 @@ void YKInitialize(){
  YKIdleCount = 0;
  YKCtxSwCount = 0;
  isrdepth = 0;
- YKNewTask(Idle, (void *)&IdleStk[256],99);
- current_task = &tasks[99];
+ YKNewTask(Idle, (void *) &IdleStk[256], 99);
+
 }
 
-void Idle(void) {
- while (1)
-  YKIdleCount++;
-}
+
+
+
+
 void Dummy(){}
 void YKNewTask(void (* task)(void),void *taskStack, unsigned char priority){
 
@@ -103,22 +106,22 @@ void YKNewTask(void (* task)(void),void *taskStack, unsigned char priority){
  newTCB->context.ss = 0;
  newTCB->context.es = 0;
 
+ newTCB->tickNum = -1;
+ newTCB->context.tstamp = 0;
+
 
  tasks[priority] = *newTCB;
- if (running) YKScheduler(0);
+ if (running) YKScheduler();
 }
 void YKRun(){
  running = 1;
  while(1)
- YKScheduler(0);
+  YKScheduler();
 }
 void YKDelayTask(unsigned count){
- int old_ip;
  current_task->tickNum = YKTickNum +count;
  current_task->state = 0;
- asm("mov word ax, word [bp+2]");
- asm("mov word [bp-2], ax");
- YKScheduler(old_ip);
+ YKScheduler();
 
 }
 void YKEnterMutex(){
@@ -129,7 +132,7 @@ void YKExitMutex(){
 }
 void YKEnterISR(){
  if (!isrdepth){
-  saveContext(&current_task->context,0);
+  saveContext(&current_task->context);
  }
  isrdepth++;
 }
@@ -139,7 +142,7 @@ void YKExitISR(){
   restoreContext(&current_task->context);
  }
 }
-void YKScheduler(int old_ip) {
+void YKScheduler() {
  int i;
  TCB * task_to_execute;
  for(i=0;i<100;i++) {
@@ -150,31 +153,42 @@ void YKScheduler(int old_ip) {
  }
  if(task_to_execute != current_task) {
   YKCtxSwCount++;
-  YKDispatcher(task_to_execute,old_ip);
+  YKDispatcher(task_to_execute);
 
  }
 }
-void YKDispatcher(TCB * task_to_execute, int old_ip) {
+void YKDispatcher(TCB * task_to_execute) {
  int tempreg;
- saveContext(&(current_task->context),old_ip);
+ void (*tempreg2)();
+ if(current_task){
+  saveContext(&(current_task->context));
+  Dummy();
+  if (YKTickNum != current_task->context.tstamp)
+   return;
+ }
  current_task = task_to_execute;
  if(task_to_execute->first_time) {
   task_to_execute->first_time = 0;
-  tempreg = task_to_execute->context.sp;
+  tempreg = task_to_execute->context.bp;
+  tempreg2 = task_to_execute->task;
+  Dummy();
   asm("mov sp,word [bp-2]");
+  asm("mov si,word [bp-4]");
+  asm("mov bp,word [bp-2]");
+  asm("call si");
+  Dummy();
 
-  task_to_execute->task();
+
  } else {
   restoreContext(&(task_to_execute->context));
-  printString("gay\n");
  }
  return;
 }
 
-void saveContext(Context * context,int old_ip) {
+void saveContext(Context * context) {
  int tempreg = 3;
- context->ip = old_ip;
 
+ context->tstamp = YKTickNum;
 
  asm("mov word [bp-2], ax");
  context->ax = tempreg;
@@ -192,9 +206,9 @@ void saveContext(Context * context,int old_ip) {
  asm("mov word [bp-2], dx");
  context->dx = tempreg;
 
-
-
-
+ asm("mov word ax, word [bp+2]");
+ asm("mov word [bp-2], ax");
+ context->ip = tempreg;
  asm("mov word [bp-2], sp");
  context->sp = tempreg;
 
@@ -212,6 +226,10 @@ void saveContext(Context * context,int old_ip) {
  context->ss = tempreg;
  asm("mov word [bp-2], es");
  context->es = tempreg;
+ asm("push word [bp]");
+ asm("pop word [bp-2]");
+ context->bp = tempreg;
+
 }
 
 void restoreContext(Context * context) {
@@ -225,7 +243,7 @@ void restoreContext(Context * context) {
  tempreg = context->dx ;
  asm("mov word dx, [bp-2]");
 
- tempreg = context->sp ;
+ tempreg = context->bp ;
  asm("mov word sp, [bp-2]");
  tempreg = context->si ;
  asm("mov word si, [bp-2]");
@@ -241,11 +259,10 @@ void restoreContext(Context * context) {
  tempreg = context->es ;
  asm("mov word es, [bp-2]");
 
+
+
+
  tempreg = context->flags;
- asm("push word [bp-2]");
- tempreg = context->cs;
- asm("push word [bp-2]");
- tempreg = context->ip;
  asm("push word [bp-2]");
 
  tempreg = context->ax;
@@ -255,7 +272,9 @@ void restoreContext(Context * context) {
 
  asm("pop si");
  asm("pop ax");
- asm("iret");
+ asm("popf");
+ asm("pop bp");
+ return;
 }
 
 void YKTickHandler() {
@@ -264,10 +283,12 @@ void YKTickHandler() {
  for(i=0;i<100;i++) {
   if(tasks[i].tickNum == YKTickNum) {
    tasks[i].state = 1;
+   printUInt(YKTickNum);
+   printString(".\n");
   }
  }
- printUInt(YKIdleCount);
- asm("cli");
+
+
  YKScheduler();
  asm("sti");
 }

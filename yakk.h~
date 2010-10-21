@@ -41,11 +41,12 @@ void YKEnterMutex();
 void YKExitMutex();
 void YKEnterISR();
 void YKExitISR();
-void YKScheduler(int old_ip);
-void YKDispatcher(TCB * task_to_execute,int old_ip);
+void YKScheduler();
+void YKDispatcher(TCB * task_to_execute);
 void saveContext(Context * context);
 void restoreContext(Context * context);
 void YKTickHandler(void);
 
 extern int YKCtxSwCount;
 extern int YKIdleCount;
+extern int YKTickNum;

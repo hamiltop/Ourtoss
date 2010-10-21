@@ -37,6 +37,7 @@ tickRoutine:
 	sti
 	call tick
 	cli
+	call YKScheduler
 	mov	al, 0x20
 	out	0x20, al
 	pop ds
