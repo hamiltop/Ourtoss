@@ -785,22 +785,20 @@ L_yakc_54:
 	mov	bp, sp
 	push	cx
 	jmp	L_yakc_55
-L_yakc_58:
-	DB	".",0xA,0
 	ALIGN	2
 YKTickHandler:
 	; >>>>> Line:	220
 	; >>>>> void YKTickHandler() { 
-	jmp	L_yakc_59
-L_yakc_60:
+	jmp	L_yakc_58
+L_yakc_59:
 	; >>>>> Line:	222
 	; >>>>> YKTickNum++; 
 	inc	word [YKTickNum]
 	; >>>>> Line:	223
 	; >>>>> for(i=0;i<100;i++) { 
 	mov	word [bp-2], 0
-	jmp	L_yakc_62
-L_yakc_61:
+	jmp	L_yakc_61
+L_yakc_60:
 	; >>>>> Line:	224
 	; >>>>> if(tasks[i].tickNum == YKTickNum) { 
 	mov	ax, word [bp-2]
@@ -811,7 +809,7 @@ L_yakc_61:
 	add	si, 36
 	mov	ax, word [YKTickNum]
 	cmp	ax, word [si]
-	jne	L_yakc_65
+	jne	L_yakc_64
 	; >>>>> Line:	225
 	; >>>>> tasks[i].state = 1; 
 	mov	ax, word [bp-2]
@@ -821,38 +819,27 @@ L_yakc_61:
 	mov	si, ax
 	add	si, 32
 	mov	word [si], 1
-	; >>>>> Line:	226
-	; >>>>> printUInt(YKTickNum); 
-	push	word [YKTickNum]
-	call	printUInt
-	add	sp, 2
-	; >>>>> Line:	227
-	; >>>>> printString(".\n"); 
-	mov	ax, L_yakc_58
-	push	ax
-	call	printString
-	add	sp, 2
-L_yakc_65:
 L_yakc_64:
-	inc	word [bp-2]
-L_yakc_62:
-	cmp	word [bp-2], 100
-	jl	L_yakc_61
 L_yakc_63:
-	; >>>>> Line:	232
+	inc	word [bp-2]
+L_yakc_61:
+	cmp	word [bp-2], 100
+	jl	L_yakc_60
+L_yakc_62:
+	; >>>>> Line:	230
 	; >>>>> YKScheduler(); 
 	call	YKScheduler
-	; >>>>> Line:	233
+	; >>>>> Line:	231
 	; >>>>> asm("sti"); 
 	sti
 	mov	sp, bp
 	pop	bp
 	ret
-L_yakc_59:
+L_yakc_58:
 	push	bp
 	mov	bp, sp
 	push	cx
-	jmp	L_yakc_60
+	jmp	L_yakc_59
 	ALIGN	2
 YKCtxSwCount:
 	TIMES	2 db 0

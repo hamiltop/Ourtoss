@@ -283,8 +283,6 @@ void YKTickHandler() {
  for(i=0;i<100;i++) {
   if(tasks[i].tickNum == YKTickNum) {
    tasks[i].state = 1;
-   printUInt(YKTickNum);
-   printString(".\n");
   }
  }
 
