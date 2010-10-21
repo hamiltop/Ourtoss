@@ -21,7 +21,7 @@ void YKInitialize(){
 	YKCtxSwCount = 0;
 	isrdepth = 0;
 	NumTasks = 0;
-	YKNewTask(Idle, (void *) &IdleStk[IDLESTACKSIZE], 2);
+	YKNewTask(Idle, (void *) &IdleStk[IDLESTACKSIZE], 100);
 //	current_task = &tasks[99];
 }
 
@@ -33,7 +33,8 @@ void Dummy(){}
 void YKNewTask(void (* task)(void),void *taskStack, unsigned char priority){
 	int i;
 	int j;
-	TCB * newTCB = &(tasks[priority]);
+	TCB tmpTCB;
+	TCB * newTCB = &tmpTCB;
 	newTCB->task = task;
 	newTCB->id = id_counter++;
 	newTCB->state = 1;
@@ -52,23 +53,24 @@ void YKNewTask(void (* task)(void),void *taskStack, unsigned char priority){
 	newTCB->tickNum = -1;
 	newTCB->context.tstamp = 0;
 	newTCB->priority = priority;
-/*	for ( i = 0; i < NumTasks + 1; i++){
+	for ( i = 0; i < NumTasks + 1; i++){
 		if (tasks[i].task == 0){
+			
 			tasks[i] = *newTCB;
 			break;
 		}
 		if (tasks[i].priority > priority){
 			for ( j = NumTasks; j > i; j--){
-				printString("Higher Priority Task inserted\n");
 				tasks[j] = tasks[j-1];
+				
 			}
 			tasks[i]= *newTCB;
 			break;
-		}
+		} 
 	}
-*/
+	
 	// initialize variables in TCB
-	tasks[priority] = *newTCB;
+	//tasks[priority] = *newTCB;
 	NumTasks++;
 	if (running) YKScheduler();
 }
@@ -111,7 +113,7 @@ void YKScheduler() {
 	TCB * task_to_execute;
 	int ireg;
 	ireg = YKEnterMutex();
-	for(i=0;i<5;i++) {
+	for(i=0;i<NumTasks;i++) {
 		if(tasks[i].state == 1) {
 			task_to_execute = &tasks[i];
 			break;
@@ -256,7 +258,7 @@ void YKTickHandler() {
 	printString("TICK ");       // Print string
 	printUInt(++YKTickNum);
 	printNewLine();
-	for(i=0;i<5;i++) {
+	for(i=0;i<NumTasks;i++) {
 		if(tasks[i].tickNum == YKTickNum) {
 			tasks[i].state = 1;
 		}

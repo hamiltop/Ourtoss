@@ -30,8 +30,8 @@ L_yakc_2:
 	; >>>>> NumTasks = 0; 
 	mov	word [NumTasks], 0
 	; >>>>> Line:	24
-	; >>>>> YKNewTask(Idle, (void *) &IdleStk[256], 2); 
-	mov	al, 2
+	; >>>>> YKNewTask(Idle, (void *) &IdleStk[256], 100); 
+	mov	al, 100
 	push	ax
 	mov	ax, (IdleStk+512)
 	push	ax
@@ -67,251 +67,256 @@ YKNewTask:
 	; >>>>> void YKNewTask(void (* task)(void),void *taskStack, unsigned char priority){ 
 	jmp	L_yakc_7
 L_yakc_8:
-	; >>>>> Line:	37
+	; >>>>> Line:	38
 	; >>>>> newTCB->task = task; 
-	mov	al, byte [bp+8]
-	xor	ah, ah
-	mov	cx, 42
-	imul	cx
-	add	ax, tasks
-	mov	word [bp-6], ax
-	; >>>>> Line:	37
+	lea	ax, [bp-46]
+	mov	word [bp-48], ax
+	; >>>>> Line:	38
 	; >>>>> newTCB->task = task; 
-	mov	si, word [bp-6]
+	mov	si, word [bp-48]
 	add	si, 40
 	mov	ax, word [bp+4]
 	mov	word [si], ax
-	; >>>>> Line:	38
+	; >>>>> Line:	39
 	; >>>>> newTCB->id = id_counter++; 
 	mov	ax, word [id_counter]
 	inc	word [id_counter]
-	mov	si, word [bp-6]
+	mov	si, word [bp-48]
 	mov	word [si], ax
-	; >>>>> Line:	39
+	; >>>>> Line:	40
 	; >>>>> newTCB->state = 1; 
-	mov	si, word [bp-6]
+	mov	si, word [bp-48]
 	add	si, 32
 	mov	word [si], 1
-	; >>>>> Line:	40
+	; >>>>> Line:	41
 	; >>>>> newTCB->first_time = 1; 
-	mov	si, word [bp-6]
+	mov	si, word [bp-48]
 	add	si, 34
 	mov	word [si], 1
-	; >>>>> Line:	42
-	; >>>>> newTCB->context.sp = (int 
-	mov	si, word [bp-6]
+	; >>>>> Line:	43
+	; >>>>> newTCB->context.sp =  
+	mov	si, word [bp-48]
 	add	si, 12
 	mov	ax, word [bp+6]
 	mov	word [si], ax
-	; >>>>> Line:	43
+	; >>>>> Line:	44
 	; >>>>> newTCB->context.bp = (int)taskStack; 
-	mov	si, word [bp-6]
+	mov	si, word [bp-48]
 	add	si, 14
 	mov	ax, word [bp+6]
 	mov	word [si], ax
-	; >>>>> Line:	44
+	; >>>>> Line:	45
 	; >>>>> newTCB->context.si = 0; 
-	mov	si, word [bp-6]
+	mov	si, word [bp-48]
 	add	si, 16
 	mov	word [si], 0
-	; >>>>> Line:	45
+	; >>>>> Line:	46
 	; >>>>> newTCB->context.di = 0; 
-	mov	si, word [bp-6]
+	mov	si, word [bp-48]
 	add	si, 18
 	mov	word [si], 0
-	; >>>>> Line:	47
+	; >>>>> Line:	48
 	; >>>>> newTCB->context.cs = 0; 
-	mov	si, word [bp-6]
+	mov	si, word [bp-48]
 	add	si, 20
 	mov	word [si], 0
-	; >>>>> Line:	48
+	; >>>>> Line:	49
 	; >>>>> newTCB->context.ds = 0; 
-	mov	si, word [bp-6]
+	mov	si, word [bp-48]
 	add	si, 22
 	mov	word [si], 0
-	; >>>>> Line:	49
+	; >>>>> Line:	50
 	; >>>>> newTCB->context.ss = 0; 
-	mov	si, word [bp-6]
+	mov	si, word [bp-48]
 	add	si, 24
 	mov	word [si], 0
-	; >>>>> Line:	50
+	; >>>>> Line:	51
 	; >>>>> newTCB->context.es = 0; 
-	mov	si, word [bp-6]
+	mov	si, word [bp-48]
 	add	si, 26
 	mov	word [si], 0
-	; >>>>> Line:	52
+	; >>>>> Line:	53
 	; >>>>> newTCB->tickNum = -1; 
-	mov	si, word [bp-6]
+	mov	si, word [bp-48]
 	add	si, 36
 	mov	word [si], -1
-	; >>>>> Line:	53
+	; >>>>> Line:	54
 	; >>>>> newTCB->context.tstamp = 0; 
-	mov	si, word [bp-6]
+	mov	si, word [bp-48]
 	add	si, 30
 	mov	word [si], 0
-	; >>>>> Line:	54
+	; >>>>> Line:	55
 	; >>>>> newTCB->priority = priority; 
-	mov	si, word [bp-6]
+	mov	si, word [bp-48]
 	add	si, 38
 	mov	al, byte [bp+8]
 	mov	byte [si], al
-	; >>>>> Line:	71
-	; >>>>> tasks[priority] = *newTCB; 
-	mov	al, byte [bp+8]
-	xor	ah, ah
+	; >>>>> Line:	56
+	; >>>>> for ( i = 0; i < NumTasks + 1; i++){ 
+	mov	word [bp-2], 0
+	jmp	L_yakc_10
+L_yakc_9:
+	; >>>>> Line:	57
+	; >>>>> if (tasks[i].task == 0){ 
+	mov	ax, word [bp-2]
 	mov	cx, 42
 	imul	cx
 	add	ax, tasks
-	mov	word [bp-8], ax
-	mov	di, word [bp-8]
-	mov	si, word [bp-6]
+	mov	si, ax
+	add	si, 40
+	mov	ax, word [si]
+	test	ax, ax
+	jne	L_yakc_13
+	; >>>>> Line:	59
+	; >>>>> tasks[i] = *newTCB; 
+	mov	ax, word [bp-2]
+	mov	cx, 42
+	imul	cx
+	add	ax, tasks
+	mov	word [bp-50], ax
+	mov	di, word [bp-50]
+	mov	si, word [bp-48]
 	mov	cx, 21
 	rep
 	movsw
-	; >>>>> Line:	72
+	; >>>>> Line:	60
+	; >>>>> break; 
+	jmp	L_yakc_11
+L_yakc_13:
+	; >>>>> Line:	62
+	; >>>>> if (tasks[i].priority > priority){ 
+	mov	ax, word [bp-2]
+	mov	cx, 42
+	imul	cx
+	add	ax, tasks
+	mov	si, ax
+	add	si, 38
+	mov	al, byte [bp+8]
+	cmp	al, byte [si]
+	jae	L_yakc_14
+	; >>>>> Line:	63
+	; >>>>> for ( j = NumTasks; j > i; j--){ 
+	mov	ax, word [NumTasks]
+	mov	word [bp-4], ax
+	jmp	L_yakc_16
+L_yakc_15:
+	; >>>>> Line:	64
+	; >>>>> tasks[j] = tasks[j-1]; 
+	mov	ax, word [bp-4]
+	dec	ax
+	mov	cx, 42
+	imul	cx
+	add	ax, tasks
+	mov	word [bp-50], ax
+	mov	ax, word [bp-4]
+	mov	cx, 42
+	imul	cx
+	add	ax, tasks
+	mov	word [bp-52], ax
+	mov	di, word [bp-52]
+	mov	si, word [bp-50]
+	mov	cx, 21
+	rep
+	movsw
+L_yakc_18:
+	dec	word [bp-4]
+L_yakc_16:
+	mov	ax, word [bp-2]
+	cmp	ax, word [bp-4]
+	jl	L_yakc_15
+L_yakc_17:
+	; >>>>> Line:	67
+	; >>>>> tasks[i]= *n 
+	mov	ax, word [bp-2]
+	mov	cx, 42
+	imul	cx
+	add	ax, tasks
+	mov	word [bp-50], ax
+	mov	di, word [bp-50]
+	mov	si, word [bp-48]
+	mov	cx, 21
+	rep
+	movsw
+	; >>>>> Line:	68
+	; >>>>> break; 
+	jmp	L_yakc_11
+L_yakc_14:
+L_yakc_12:
+	inc	word [bp-2]
+L_yakc_10:
+	mov	ax, word [NumTasks]
+	inc	ax
+	mov	dx, word [bp-2]
+	cmp	dx, ax
+	jl	L_yakc_9
+L_yakc_11:
+	; >>>>> Line:	74
 	; >>>>> NumTasks++; 
 	inc	word [NumTasks]
-	; >>>>> Line:	73
+	; >>>>> Line:	75
 	; >>>>> if (running) YKScheduler(); 
 	mov	ax, word [running]
 	test	ax, ax
-	je	L_yakc_9
-	; >>>>> Line:	73
+	je	L_yakc_19
+	; >>>>> Line:	75
 	; >>>>> if (running) YKScheduler(); 
 	call	YKScheduler
-L_yakc_9:
+L_yakc_19:
 	mov	sp, bp
 	pop	bp
 	ret
 L_yakc_7:
 	push	bp
 	mov	bp, sp
-	sub	sp, 8
+	sub	sp, 52
 	jmp	L_yakc_8
 	ALIGN	2
 YKRun:
-	; >>>>> Line:	75
+	; >>>>> Line:	77
 	; >>>>> void YKRun(){ 
-	jmp	L_yakc_11
-L_yakc_12:
-	; >>>>> Line:	76
+	jmp	L_yakc_21
+L_yakc_22:
+	; >>>>> Line:	78
 	; >>>>> running = 1; 
 	mov	word [running], 1
-	; >>>>> Line:	77
+	; >>>>> Line:	79
 	; >>>>> while(1) 
-	jmp	L_yakc_14
-L_yakc_13:
-	; >>>>> Line:	78
+	jmp	L_yakc_24
+L_yakc_23:
+	; >>>>> Line:	80
 	; >>>>> YKScheduler(); 
 	call	YKScheduler
-L_yakc_14:
-	jmp	L_yakc_13
-L_yakc_15:
+L_yakc_24:
+	jmp	L_yakc_23
+L_yakc_25:
 	mov	sp, bp
 	pop	bp
 	ret
-L_yakc_11:
+L_yakc_21:
 	push	bp
 	mov	bp, sp
-	jmp	L_yakc_12
+	jmp	L_yakc_22
 	ALIGN	2
 YKDelayTask:
-	; >>>>> Line:	80
+	; >>>>> Line:	82
 	; >>>>> void YKDelayTask(unsigned count){ 
-	jmp	L_yakc_17
-L_yakc_18:
-	; >>>>> Line:	81
+	jmp	L_yakc_27
+L_yakc_28:
+	; >>>>> Line:	83
 	; >>>>> current_task->tickNum = YKTickNum +count; 
 	mov	ax, word [YKTickNum]
 	add	ax, word [bp+4]
 	mov	si, word [current_task]
 	add	si, 36
 	mov	word [si], ax
-	; >>>>> Line:	82
-	; >>>>> ask_to_execu 
+	; >>>>> Line:	84
+	; >>>>> current_task->state = 0; 
 	mov	si, word [current_task]
 	add	si, 32
 	mov	word [si], 0
-	; >>>>> Line:	83
+	; >>>>> Line:	85
 	; >>>>> YKScheduler(); 
 	call	YKScheduler
-	mov	sp, bp
-	pop	bp
-	ret
-L_yakc_17:
-	push	bp
-	mov	bp, sp
-	jmp	L_yakc_18
-	ALIGN	2
-YKEnterMutex:
-	; >>>>> Line:	86
-	; >>>>> int YKEnterMutex(){ 
-	jmp	L_yakc_20
-L_yakc_21:
-	; >>>>> Line:	88
-	; >>>>> asm("pushf"); 
-	pushf
-	; >>>>> Line:	89
-	; >>>>> asm("pop word [bp-2]"); 
-	pop word [bp-2]
-	; >>>>> Line:	90
-	; >>>>> asm("cli"); 
-	cli
-	; >>>>> Line:	91
-	; >>>>> ireg = ireg & (1 << 9); 
-	mov	ax, word [bp-2]
-	and	ax, 512
-	mov	word [bp-2], ax
-	; >>>>> Line:	92
-	; >>>>> return ireg; 
-	mov	ax, word [bp-2]
-L_yakc_22:
-	mov	sp, bp
-	pop	bp
-	ret
-L_yakc_20:
-	push	bp
-	mov	bp, sp
-	push	cx
-	jmp	L_yakc_21
-	ALIGN	2
-YKExitMutex:
-	; >>>>> Line:	94
-	; >>>>> void YKExitMutex(){ 
-	jmp	L_yakc_24
-L_yakc_25:
-	; >>>>> Line:	95
-	; >>>>> asm("sti"); 
-	sti
-	mov	sp, bp
-	pop	bp
-	ret
-L_yakc_24:
-	push	bp
-	mov	bp, sp
-	jmp	L_yakc_25
-	ALIGN	2
-YKEnterISR:
-	; >>>>> Line:	97
-	; >>>>> void YKEnterISR(){ 
-	jmp	L_yakc_27
-L_yakc_28:
-	; >>>>> Line:	98
-	; >>>>> if (!isrdepth){ 
-	mov	ax, word [isrdepth]
-	test	ax, ax
-	jne	L_yakc_29
-	; >>>>> Line:	99
-	; >>>>> saveContext(&current_task->context); 
-	mov	ax, word [current_task]
-	add	ax, 2
-	push	ax
-	call	saveContext
-	add	sp, 2
-L_yakc_29:
-	; >>>>> Line:	101
-	; >>>>> isrdepth++; 
-	inc	word [isrdepth]
 	mov	sp, bp
 	pop	bp
 	ret
@@ -320,46 +325,123 @@ L_yakc_27:
 	mov	bp, sp
 	jmp	L_yakc_28
 	ALIGN	2
-YKExitISR:
-	; >>>>> Line:	103
-	; >>>>> void YKExitISR(){ 
-	jmp	L_yakc_31
+YKEnterMutex:
+	; >>>>> Line:	88
+	; >>>>> int YKEnterMutex(){ 
+	jmp	L_yakc_30
+L_yakc_31:
+	; >>>>> Line:	90
+	; >>>>> asm("pushf"); 
+	pushf
+	; >>>>> Line:	91
+	; >>>>> asm("pop word [bp-2]"); 
+	pop word [bp-2]
+	; >>>>> Line:	92
+	; >>>>> asm("cli"); 
+	cli
+	; >>>>> Line:	93
+	; >>>>> ireg = ireg & (1 << 9); 
+	mov	ax, word [bp-2]
+	and	ax, 512
+	mov	word [bp-2], ax
+	; >>>>> Line:	94
+	; >>>>> return ireg; 
+	mov	ax, word [bp-2]
 L_yakc_32:
-	; >>>>> Line:	104
-	; >>>>> isrdepth--; 
-	dec	word [isrdepth]
-	; >>>>> Line:	105
-	; >>>>> if (!isrdepth){ 
-	mov	ax, word [isrdepth]
-	test	ax, ax
-	jne	L_yakc_33
-	; >>>>> Line:	106
-	; >>>>> YKScheduler(); 
-	call	YKScheduler
-L_yakc_33:
 	mov	sp, bp
 	pop	bp
 	ret
-L_yakc_31:
+L_yakc_30:
 	push	bp
 	mov	bp, sp
-	jmp	L_yakc_32
+	push	cx
+	jmp	L_yakc_31
+	ALIGN	2
+YKExitMutex:
+	; >>>>> Line:	96
+	; >>>>> void YKExitMutex(){ 
+	jmp	L_yakc_34
+L_yakc_35:
+	; >>>>> Line:	97
+	; >>>>> asm("sti"); 
+	sti
+	mov	sp, bp
+	pop	bp
+	ret
+L_yakc_34:
+	push	bp
+	mov	bp, sp
+	jmp	L_yakc_35
+	ALIGN	2
+YKEnterISR:
+	; >>>>> Line:	99
+	; >>>>> void YKEnterISR(){ 
+	jmp	L_yakc_37
+L_yakc_38:
+	; >>>>> Line:	100
+	; >>>>> if (!isrdepth){ 
+	mov	ax, word [isrdepth]
+	test	ax, ax
+	jne	L_yakc_39
+	; >>>>> Line:	101
+	; >>>>> saveContext(&current_task->context); 
+	mov	ax, word [current_task]
+	add	ax, 2
+	push	ax
+	call	saveContext
+	add	sp, 2
+L_yakc_39:
+	; >>>>> Line:	103
+	; >>>>> isrdepth++; 
+	inc	word [isrdepth]
+	mov	sp, bp
+	pop	bp
+	ret
+L_yakc_37:
+	push	bp
+	mov	bp, sp
+	jmp	L_yakc_38
+	ALIGN	2
+YKExitISR:
+	; >>>>> Line:	105
+	; >>>>> k->context)) 
+	jmp	L_yakc_41
+L_yakc_42:
+	; >>>>> Line:	106
+	; >>>>> isrdepth--; 
+	dec	word [isrdepth]
+	; >>>>> Line:	107
+	; >>>>> if (!isrdepth){ 
+	mov	ax, word [isrdepth]
+	test	ax, ax
+	jne	L_yakc_43
+	; >>>>> Line:	108
+	; >>>>> YKScheduler(); 
+	call	YKScheduler
+L_yakc_43:
+	mov	sp, bp
+	pop	bp
+	ret
+L_yakc_41:
+	push	bp
+	mov	bp, sp
+	jmp	L_yakc_42
 	ALIGN	2
 YKScheduler:
-	; >>>>> Line:	109
+	; >>>>> Line:	111
 	; >>>>> void YKScheduler() { 
-	jmp	L_yakc_35
-L_yakc_36:
-	; >>>>> Line:	113
+	jmp	L_yakc_45
+L_yakc_46:
+	; >>>>> Line:	115
 	; >>>>> ireg = YKEnterMutex(); 
 	call	YKEnterMutex
 	mov	word [bp-6], ax
-	; >>>>> Line:	114
-	; >>>>> for(i=0;i<5;i++) { 
+	; >>>>> Line:	116
+	; >>>>> for(i=0;i<NumTasks;i++) { 
 	mov	word [bp-2], 0
-	jmp	L_yakc_38
-L_yakc_37:
-	; >>>>> Line:	115
+	jmp	L_yakc_48
+L_yakc_47:
+	; >>>>> Line:	117
 	; >>>>> if(tasks[i].state == 1) { 
 	mov	ax, word [bp-2]
 	mov	cx, 42
@@ -368,305 +450,306 @@ L_yakc_37:
 	mov	si, ax
 	add	si, 32
 	cmp	word [si], 1
-	jne	L_yakc_41
-	; >>>>> Line:	116
-	; >>>>> _execute->context.bp; 
+	jne	L_yakc_51
+	; >>>>> Line:	118
+	; >>>>> task_to_execute = &tasks[i]; 
 	mov	ax, word [bp-2]
 	mov	cx, 42
 	imul	cx
 	add	ax, tasks
 	mov	word [bp-4], ax
-	; >>>>> Line:	117
+	; >>>>> Line:	119
 	; >>>>> break; 
-	jmp	L_yakc_39
-L_yakc_41:
-L_yakc_40:
+	jmp	L_yakc_49
+L_yakc_51:
+L_yakc_50:
 	inc	word [bp-2]
-L_yakc_38:
-	cmp	word [bp-2], 5
-	jl	L_yakc_37
-L_yakc_39:
-	; >>>>> Line:	120
+L_yakc_48:
+	mov	ax, word [NumTasks]
+	cmp	ax, word [bp-2]
+	jg	L_yakc_47
+L_yakc_49:
+	; >>>>> Line:	122
 	; >>>>> if(task_to_execute != current_task) { 
 	mov	ax, word [current_task]
 	cmp	ax, word [bp-4]
-	je	L_yakc_42
-	; >>>>> Line:	121
+	je	L_yakc_52
+	; >>>>> Line:	123
 	; >>>>> YKCtxSwCount++; 
 	inc	word [YKCtxSwCount]
-	; >>>>> Line:	122
+	; >>>>> Line:	124
 	; >>>>> YKDispatcher(task_to_execute); 
 	push	word [bp-4]
 	call	YKDispatcher
 	add	sp, 2
-L_yakc_42:
-	; >>>>> Line:	125
+L_yakc_52:
+	; >>>>> Line:	127
 	; >>>>> if(ireg) 
 	mov	ax, word [bp-6]
 	test	ax, ax
-	je	L_yakc_43
-	; >>>>> Line:	126
+	je	L_yakc_53
+	; >>>>> Line:	128
 	; >>>>> YKExitMutex(); 
 	call	YKExitMutex
-L_yakc_43:
-	mov	sp, bp
-	pop	bp
-	ret
-L_yakc_35:
-	push	bp
-	mov	bp, sp
-	sub	sp, 6
-	jmp	L_yakc_36
-	ALIGN	2
-YKDispatcher:
-	; >>>>> Line:	128
-	; >>>>> void YKDispatcher(TCB * task_to_execute) { 
-	jmp	L_yakc_45
-L_yakc_46:
-	; >>>>> Line:	131
-	; >>>>> if(current_task){ 
-	mov	ax, word [current_task]
-	test	ax, ax
-	je	L_yakc_47
-	; >>>>> Line:	132
-	; >>>>> saveContext(&(current_task->context)); 
-	mov	ax, word [current_task]
-	add	ax, 2
-	push	ax
-	call	saveContext
-	add	sp, 2
-	; >>>>> Line:	133
-	; >>>>> Dummy(); 
-	call	Dummy
-	; >>>>> Line:	134
-	; >>>>> if (YKTickNum != current_task->context.tstamp) 
-	mov	si, word [current_task]
-	add	si, 30
-	mov	ax, word [YKTickNum]
-	cmp	ax, word [si]
-	je	L_yakc_48
-	; >>>>> Line:	135
-	; >>>>> return; 
-	jmp	L_yakc_49
-L_yakc_48:
-L_yakc_47:
-	; >>>>> Line:	137
-	; >>>>> current_task = task_to_execute; 
-	mov	ax, word [bp+4]
-	mov	word [current_task], ax
-	; >>>>> Line:	138
-	; >>>>> if(task_to_execute->first_time) { 
-	mov	si, word [bp+4]
-	add	si, 34
-	mov	ax, word [si]
-	test	ax, ax
-	je	L_yakc_50
-	; >>>>> Line:	139
-	; >>>>> task_to_execute->first_time = 0; 
-	mov	si, word [bp+4]
-	add	si, 34
-	mov	word [si], 0
-	; >>>>> Line:	140
-	; >>>>> tempreg = task_to_execute->context.bp; 
-	mov	si, word [bp+4]
-	add	si, 14
-	mov	ax, word [si]
-	mov	word [bp-2], ax
-	; >>>>> Line:	141
-	; >>>>> tempreg2 = task_to_execute->task; 
-	mov	si, word [bp+4]
-	add	si, 40
-	mov	ax, word [si]
-	mov	word [bp-4], ax
-	; >>>>> Line:	142
-	; >>>>> Dummy(); 
-	call	Dummy
-	; >>>>> Line:	143
-	; >>>>> asm("mov sp,word [bp-2]"); 
-	mov sp,word [bp-2]
-	; >>>>> Line:	144
-	; >>>>> asm("mov si,word [bp-4]"); 
-	mov si,word [bp-4]
-	; >>>>> Line:	145
-	; >>>>> asm("mov bp,word [bp-2]"); 
-	mov bp,word [bp-2]
-	; >>>>> Line:	146
-	; >>>>> asm("sti"); 
-	sti
-	; >>>>> Line:	147
-	; >>>>> asm("call si"); 
-	call si
-	; >>>>> Line:	148
-	; >>>>> Dummy(); 
-	call	Dummy
-	jmp	L_yakc_51
-L_yakc_50:
-	; >>>>> Line:	152
-	; >>>>> restoreContext(&(task_to_execute->context)); 
-	mov	ax, word [bp+4]
-	add	ax, 2
-	push	ax
-	call	restoreContext
-	add	sp, 2
-L_yakc_51:
-L_yakc_49:
-	; >>>>> Line:	154
-	; >>>>> return; 
+L_yakc_53:
 	mov	sp, bp
 	pop	bp
 	ret
 L_yakc_45:
 	push	bp
 	mov	bp, sp
-	sub	sp, 4
+	sub	sp, 6
 	jmp	L_yakc_46
 	ALIGN	2
+YKDispatcher:
+	; >>>>> Line:	130
+	; >>>>> void YKDispatcher(TCB * task_to_execute) { 
+	jmp	L_yakc_55
+L_yakc_56:
+	; >>>>> Line:	133
+	; >>>>> if(current_task){ 
+	mov	ax, word [current_task]
+	test	ax, ax
+	je	L_yakc_57
+	; >>>>> Line:	134
+	; >>>>> saveContext(&(current_task->context)) 
+	mov	ax, word [current_task]
+	add	ax, 2
+	push	ax
+	call	saveContext
+	add	sp, 2
+	; >>>>> Line:	135
+	; >>>>> Dummy(); 
+	call	Dummy
+	; >>>>> Line:	136
+	; >>>>> if (YKTickNum != current_task->context.tstamp) 
+	mov	si, word [current_task]
+	add	si, 30
+	mov	ax, word [YKTickNum]
+	cmp	ax, word [si]
+	je	L_yakc_58
+	; >>>>> Line:	137
+	; >>>>> return; 
+	jmp	L_yakc_59
+L_yakc_58:
+L_yakc_57:
+	; >>>>> Line:	139
+	; >>>>> current_task = task_to_execute; 
+	mov	ax, word [bp+4]
+	mov	word [current_task], ax
+	; >>>>> Line:	140
+	; >>>>> if(task_to_execute->first_time) { 
+	mov	si, word [bp+4]
+	add	si, 34
+	mov	ax, word [si]
+	test	ax, ax
+	je	L_yakc_60
+	; >>>>> Line:	141
+	; >>>>> task_to_execute->first_time = 0; 
+	mov	si, word [bp+4]
+	add	si, 34
+	mov	word [si], 0
+	; >>>>> Line:	142
+	; >>>>> tempreg = task_to_execute->context.bp; 
+	mov	si, word [bp+4]
+	add	si, 14
+	mov	ax, word [si]
+	mov	word [bp-2], ax
+	; >>>>> Line:	143
+	; >>>>> tempreg2 = task_to_execute->task; 
+	mov	si, word [bp+4]
+	add	si, 40
+	mov	ax, word [si]
+	mov	word [bp-4], ax
+	; >>>>> Line:	144
+	; >>>>> Dummy(); 
+	call	Dummy
+	; >>>>> Line:	145
+	; >>>>> asm("mov sp,word [bp-2]"); 
+	mov sp,word [bp-2]
+	; >>>>> Line:	146
+	; >>>>> asm("mov si,word [bp-4]"); 
+	mov si,word [bp-4]
+	; >>>>> Line:	147
+	; >>>>> asm("mov bp,word [bp-2]"); 
+	mov bp,word [bp-2]
+	; >>>>> Line:	148
+	; >>>>> asm("sti"); 
+	sti
+	; >>>>> Line:	149
+	; >>>>> asm("call si"); 
+	call si
+	; >>>>> Line:	150
+	; >>>>> Dummy(); 
+	call	Dummy
+	jmp	L_yakc_61
+L_yakc_60:
+	; >>>>> Line:	154
+	; >>>>> restoreContext(&(task_to_execute->context)); 
+	mov	ax, word [bp+4]
+	add	ax, 2
+	push	ax
+	call	restoreContext
+	add	sp, 2
+L_yakc_61:
+L_yakc_59:
+	; >>>>> Line:	156
+	; >>>>> return; 
+	mov	sp, bp
+	pop	bp
+	ret
+L_yakc_55:
+	push	bp
+	mov	bp, sp
+	sub	sp, 4
+	jmp	L_yakc_56
+	ALIGN	2
 saveContext:
-	; >>>>> Line:	157
+	; >>>>> Line:	159
 	; >>>>> void saveContext(Context * context) { 
-	jmp	L_yakc_53
-L_yakc_54:
-	; >>>>> Line:	161
+	jmp	L_yakc_63
+L_yakc_64:
+	; >>>>> Line:	163
 	; >>>>> context->tstamp = YKTickNum; 
 	mov	word [bp-2], 3
-	; >>>>> Line:	161
+	; >>>>> Line:	163
 	; >>>>> context->tstamp = YKTickNum; 
 	mov	si, word [bp+4]
 	add	si, 28
 	mov	ax, word [YKTickNum]
 	mov	word [si], ax
-	; >>>>> Line:	163
+	; >>>>> Line:	165
 	; >>>>> asm("mov word [bp-2], ax"); 
 	mov word [bp-2], ax
-	; >>>>> Line:	164
+	; >>>>> Line:	166
 	; >>>>> context->ax = tempreg; 
 	mov	si, word [bp+4]
 	mov	ax, word [bp-2]
 	mov	word [si], ax
-	; >>>>> Line:	166
+	; >>>>> Line:	168
 	; >>>>> asm("pushf"); 
 	pushf
-	; >>>>> Line:	167
+	; >>>>> Line:	169
 	; >>>>> asm("pop ax"); 
 	pop ax
-	; >>>>> Line:	169
+	; >>>>> Line:	171
 	; >>>>> asm("mov word [bp-2], ax"); 
 	mov word [bp-2], ax
-	; >>>>> Line:	170
+	; >>>>> Line:	172
 	; >>>>> context->flags = tempreg; 
 	mov	si, word [bp+4]
 	add	si, 26
 	mov	ax, word [bp-2]
 	mov	word [si], ax
-	; >>>>> Line:	172
+	; >>>>> Line:	174
 	; >>>>> asm("mov word [bp-2], bx"); 
 	mov word [bp-2], bx
-	; >>>>> Line:	173
+	; >>>>> Line:	175
 	; >>>>> context->bx = tempreg; 
 	mov	si, word [bp+4]
 	add	si, 2
 	mov	ax, word [bp-2]
 	mov	word [si], ax
-	; >>>>> Line:	174
+	; >>>>> Line:	176
 	; >>>>> asm("mov word [bp-2], cx"); 
 	mov word [bp-2], cx
-	; >>>>> Line:	175
+	; >>>>> Line:	177
 	; >>>>> context->cx = tempreg; 
 	mov	si, word [bp+4]
 	add	si, 4
 	mov	ax, word [bp-2]
 	mov	word [si], ax
-	; >>>>> Line:	176
+	; >>>>> Line:	178
 	; >>>>> asm("mov word [bp-2], dx"); 
 	mov word [bp-2], dx
-	; >>>>> Line:	177
+	; >>>>> Line:	179
 	; >>>>> context->dx = tempreg; 
 	mov	si, word [bp+4]
 	add	si, 6
 	mov	ax, word [bp-2]
 	mov	word [si], ax
-	; >>>>> Line:	179
+	; >>>>> Line:	181
 	; >>>>> asm("mov word ax, word [bp+2]"); 
 	mov word ax, word [bp+2]
-	; >>>>> Line:	180
+	; >>>>> Line:	182
 	; >>>>> asm("mov word [bp-2], ax"); 
 	mov word [bp-2], ax
-	; >>>>> Line:	181
+	; >>>>> Line:	183
 	; >>>>> context->ip = tempreg; 
 	mov	si, word [bp+4]
 	add	si, 8
 	mov	ax, word [bp-2]
 	mov	word [si], ax
-	; >>>>> Line:	182
+	; >>>>> Line:	184
 	; >>>>> asm("mov word [bp-2], sp"); 
 	mov word [bp-2], sp
-	; >>>>> Line:	183
+	; >>>>> Line:	185
 	; >>>>> context->sp = tempreg; 
 	mov	si, word [bp+4]
 	add	si, 10
 	mov	ax, word [bp-2]
 	mov	word [si], ax
-	; >>>>> Line:	186
-	; >>>>> asm("mov word [bp-2], si"); 
+	; >>>>> Line:	188
+	; >>>>> asm("mov word [bp- 
 	mov word [bp-2], si
-	; >>>>> Line:	187
+	; >>>>> Line:	189
 	; >>>>> context->si = tempreg; 
 	mov	si, word [bp+4]
 	add	si, 14
 	mov	ax, word [bp-2]
 	mov	word [si], ax
-	; >>>>> Line:	188
+	; >>>>> Line:	190
 	; >>>>> asm("mov word [bp-2], di"); 
 	mov word [bp-2], di
-	; >>>>> Line:	189
+	; >>>>> Line:	191
 	; >>>>> context->di = tempreg; 
 	mov	si, word [bp+4]
 	add	si, 16
 	mov	ax, word [bp-2]
 	mov	word [si], ax
-	; >>>>> Line:	191
+	; >>>>> Line:	193
 	; >>>>> asm("mov word [bp-2], cs"); 
 	mov word [bp-2], cs
-	; >>>>> Line:	192
+	; >>>>> Line:	194
 	; >>>>> context->cs = tempreg; 
 	mov	si, word [bp+4]
 	add	si, 18
 	mov	ax, word [bp-2]
 	mov	word [si], ax
-	; >>>>> Line:	193
+	; >>>>> Line:	195
 	; >>>>> asm("mov word [bp-2], ds"); 
 	mov word [bp-2], ds
-	; >>>>> Line:	194
+	; >>>>> Line:	196
 	; >>>>> context->ds = tempreg; 
 	mov	si, word [bp+4]
 	add	si, 20
 	mov	ax, word [bp-2]
 	mov	word [si], ax
-	; >>>>> Line:	195
-	; >>>>> asm("mov word [bp-2], ss" 
+	; >>>>> Line:	197
+	; >>>>> asm("mov word [bp-2], ss"); 
 	mov word [bp-2], ss
-	; >>>>> Line:	196
+	; >>>>> Line:	198
 	; >>>>> context->ss = tempreg; 
 	mov	si, word [bp+4]
 	add	si, 22
 	mov	ax, word [bp-2]
 	mov	word [si], ax
-	; >>>>> Line:	197
+	; >>>>> Line:	199
 	; >>>>> asm("mov word [bp-2], es"); 
 	mov word [bp-2], es
-	; >>>>> Line:	198
+	; >>>>> Line:	200
 	; >>>>> context->es = tempreg; 
 	mov	si, word [bp+4]
 	add	si, 24
 	mov	ax, word [bp-2]
 	mov	word [si], ax
-	; >>>>> Line:	199
+	; >>>>> Line:	201
 	; >>>>> asm("push word [bp]"); 
 	push word [bp]
-	; >>>>> Line:	200
+	; >>>>> Line:	202
 	; >>>>> asm("pop word [bp-2]"); 
 	pop word [bp-2]
-	; >>>>> Line:	201
+	; >>>>> Line:	203
 	; >>>>> context->bp = tempreg; 
 	mov	si, word [bp+4]
 	add	si, 12
@@ -675,174 +758,174 @@ L_yakc_54:
 	mov	sp, bp
 	pop	bp
 	ret
-L_yakc_53:
+L_yakc_63:
 	push	bp
 	mov	bp, sp
 	push	cx
-	jmp	L_yakc_54
+	jmp	L_yakc_64
 	ALIGN	2
 restoreContext:
-	; >>>>> Line:	206
+	; >>>>> Line:	208
 	; >>>>> void restoreContext(Context * context) { 
-	jmp	L_yakc_56
-L_yakc_57:
-	; >>>>> Line:	211
+	jmp	L_yakc_66
+L_yakc_67:
+	; >>>>> Line:	213
 	; >>>>> tempreg = context->bx ; 
 	mov	si, word [bp+4]
 	add	si, 2
 	mov	ax, word [si]
 	mov	word [bp-2], ax
-	; >>>>> Line:	212
+	; >>>>> Line:	214
 	; >>>>> asm("mov word bx, [bp-2]"); 
 	mov word bx, [bp-2]
-	; >>>>> Line:	213
-	; >>>>> tempreg = context->cx ; 
+	; >>>>> Line:	215
+	; >>>>> tempreg = context->cx 
 	mov	si, word [bp+4]
 	add	si, 4
 	mov	ax, word [si]
 	mov	word [bp-2], ax
-	; >>>>> Line:	214
+	; >>>>> Line:	216
 	; >>>>> asm("mov word cx, [bp-2]"); 
 	mov word cx, [bp-2]
-	; >>>>> Line:	215
+	; >>>>> Line:	217
 	; >>>>> tempreg = context->dx ; 
 	mov	si, word [bp+4]
 	add	si, 6
 	mov	ax, word [si]
 	mov	word [bp-2], ax
-	; >>>>> Line:	216
+	; >>>>> Line:	218
 	; >>>>> asm("mov word dx, [bp-2]"); 
 	mov word dx, [bp-2]
-	; >>>>> Line:	218
+	; >>>>> Line:	220
 	; >>>>> tempreg = context->bp ; 
 	mov	si, word [bp+4]
 	add	si, 12
 	mov	ax, word [si]
 	mov	word [bp-2], ax
-	; >>>>> Line:	219
+	; >>>>> Line:	221
 	; >>>>> asm("mov word sp, [bp-2]"); 
 	mov word sp, [bp-2]
-	; >>>>> Line:	220
+	; >>>>> Line:	222
 	; >>>>> tempreg = context->si ; 
 	mov	si, word [bp+4]
 	add	si, 14
 	mov	ax, word [si]
 	mov	word [bp-2], ax
-	; >>>>> Line:	221
+	; >>>>> Line:	223
 	; >>>>> asm("mov word si, [bp-2]"); 
 	mov word si, [bp-2]
-	; >>>>> Line:	222
+	; >>>>> Line:	224
 	; >>>>> tempreg = context->di ; 
 	mov	si, word [bp+4]
 	add	si, 16
 	mov	ax, word [si]
 	mov	word [bp-2], ax
-	; >>>>> Line:	223
+	; >>>>> Line:	225
 	; >>>>> asm("mov word di, [bp-2]"); 
 	mov word di, [bp-2]
-	; >>>>> Line:	225
+	; >>>>> Line:	227
 	; >>>>> tempreg = context->cs ; 
 	mov	si, word [bp+4]
 	add	si, 18
 	mov	ax, word [si]
 	mov	word [bp-2], ax
-	; >>>>> Line:	226
+	; >>>>> Line:	228
 	; >>>>> asm("mov word cs, [bp-2]"); 
 	mov word cs, [bp-2]
-	; >>>>> Line:	227
+	; >>>>> Line:	229
 	; >>>>> tempreg = context->ds ; 
 	mov	si, word [bp+4]
 	add	si, 20
 	mov	ax, word [si]
 	mov	word [bp-2], ax
-	; >>>>> Line:	228
+	; >>>>> Line:	230
 	; >>>>> asm("mov word ds, [bp-2]"); 
 	mov word ds, [bp-2]
-	; >>>>> Line:	229
+	; >>>>> Line:	231
 	; >>>>> tempreg = context->ss ; 
 	mov	si, word [bp+4]
 	add	si, 22
 	mov	ax, word [si]
 	mov	word [bp-2], ax
-	; >>>>> Line:	230
+	; >>>>> Line:	232
 	; >>>>> asm("mov word ss, [bp-2]"); 
 	mov word ss, [bp-2]
-	; >>>>> Line:	231
+	; >>>>> Line:	233
 	; >>>>> tempreg = context->es ; 
 	mov	si, word [bp+4]
 	add	si, 24
 	mov	ax, word [si]
 	mov	word [bp-2], ax
-	; >>>>> Line:	232
+	; >>>>> Line:	234
 	; >>>>> asm("mov word es, [bp-2]"); 
 	mov word es, [bp-2]
-	; >>>>> Line:	237
+	; >>>>> Line:	239
 	; >>>>> tempreg = context->flags; 
 	mov	si, word [bp+4]
 	add	si, 26
 	mov	ax, word [si]
 	mov	word [bp-2], ax
-	; >>>>> Line:	238
-	; >>>>> asm("push word [bp-2]"); 
-	push word [bp-2]
 	; >>>>> Line:	240
-	; >>>>> tempreg = context->ax; 
-	mov	si, word [bp+4]
-	mov	ax, word [si]
-	mov	word [bp-2], ax
-	; >>>>> Line:	241
-	; >>>>> asm("push word [bp-2]"); 
+	; >>>>> asm("push word 
 	push word [bp-2]
 	; >>>>> Line:	242
-	; >>>>> tempreg = context->si; 
+	; >>>>> tempreg = context->ax; 
 	mov	si, word [bp+4]
-	add	si, 14
 	mov	ax, word [si]
 	mov	word [bp-2], ax
 	; >>>>> Line:	243
 	; >>>>> asm("push word [bp-2]"); 
 	push word [bp-2]
+	; >>>>> Line:	244
+	; >>>>> tempreg = context->si; 
+	mov	si, word [bp+4]
+	add	si, 14
+	mov	ax, word [si]
+	mov	word [bp-2], ax
 	; >>>>> Line:	245
+	; >>>>> asm("push word [bp-2]"); 
+	push word [bp-2]
+	; >>>>> Line:	247
 	; >>>>> asm("pop si"); 
 	pop si
-	; >>>>> Line:	246
+	; >>>>> Line:	248
 	; >>>>> asm("pop ax"); 
 	pop ax
-	; >>>>> Line:	247
+	; >>>>> Line:	249
 	; >>>>> asm("popf"); 
 	popf
-	; >>>>> Line:	248
+	; >>>>> Line:	250
 	; >>>>> asm("pop bp"); 
 	pop bp
-L_yakc_58:
-	; >>>>> Line:	250
+L_yakc_68:
+	; >>>>> Line:	252
 	; >>>>> return; 
 	mov	sp, bp
 	pop	bp
 	ret
-L_yakc_56:
+L_yakc_66:
 	push	bp
 	mov	bp, sp
 	push	cx
-	jmp	L_yakc_57
-L_yakc_60:
+	jmp	L_yakc_67
+L_yakc_70:
 	DB	"TICK ",0
 	ALIGN	2
 YKTickHandler:
-	; >>>>> Line:	253
-	; >>>>> void YKTickHandler() { 
-	jmp	L_yakc_61
-L_yakc_62:
 	; >>>>> Line:	255
-	; >>>>>  
+	; >>>>> void YKTickHandler() { 
+	jmp	L_yakc_71
+L_yakc_72:
+	; >>>>> Line:	257
+	; >>>>> printNewLine(); 
 	call	printNewLine
-	; >>>>> Line:	256
+	; >>>>> Line:	258
 	; >>>>> printString("TICK "); 
-	mov	ax, L_yakc_60
+	mov	ax, L_yakc_70
 	push	ax
 	call	printString
 	add	sp, 2
-	; >>>>> Line:	257
+	; >>>>> Line:	259
 	; >>>>> printUInt(++YKTickNum); 
 	mov	ax, word [YKTickNum]
 	inc	ax
@@ -850,15 +933,15 @@ L_yakc_62:
 	push	ax
 	call	printUInt
 	add	sp, 2
-	; >>>>> Line:	258
+	; >>>>> Line:	260
 	; >>>>> printNewLine(); 
 	call	printNewLine
-	; >>>>> Line:	259
-	; >>>>> for(i=0;i<5;i++) { 
+	; >>>>> Line:	261
+	; >>>>> for(i=0;i<NumTasks;i++) { 
 	mov	word [bp-2], 0
-	jmp	L_yakc_64
-L_yakc_63:
-	; >>>>> Line:	260
+	jmp	L_yakc_74
+L_yakc_73:
+	; >>>>> Line:	262
 	; >>>>> if(tasks[i].tickNum == YKTickNum) { 
 	mov	ax, word [bp-2]
 	mov	cx, 42
@@ -868,8 +951,8 @@ L_yakc_63:
 	add	si, 36
 	mov	ax, word [YKTickNum]
 	cmp	ax, word [si]
-	jne	L_yakc_67
-	; >>>>> Line:	261
+	jne	L_yakc_77
+	; >>>>> Line:	263
 	; >>>>> tasks[i].state = 1; 
 	mov	ax, word [bp-2]
 	mov	cx, 42
@@ -878,21 +961,22 @@ L_yakc_63:
 	mov	si, ax
 	add	si, 32
 	mov	word [si], 1
-L_yakc_67:
-L_yakc_66:
+L_yakc_77:
+L_yakc_76:
 	inc	word [bp-2]
-L_yakc_64:
-	cmp	word [bp-2], 5
-	jl	L_yakc_63
-L_yakc_65:
+L_yakc_74:
+	mov	ax, word [NumTasks]
+	cmp	ax, word [bp-2]
+	jg	L_yakc_73
+L_yakc_75:
 	mov	sp, bp
 	pop	bp
 	ret
-L_yakc_61:
+L_yakc_71:
 	push	bp
 	mov	bp, sp
 	push	cx
-	jmp	L_yakc_62
+	jmp	L_yakc_72
 	ALIGN	2
 YKCtxSwCount:
 	TIMES	2 db 0
