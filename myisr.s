@@ -8,9 +8,11 @@ resetRoutine:
 	push bp
 	push es
 	push ds
+	call YKEnterISR
 	sti
 	call reset
 	cli
+	call YKExitISR
 	mov	al, 0x20
 	out	0x20, al
 	pop ds
@@ -25,6 +27,7 @@ resetRoutine:
 	iret
 	
 tickRoutine:
+;	inc word [YKTickNum]
 	push ax
 	push bx
 	push cx
@@ -34,9 +37,11 @@ tickRoutine:
 	push bp
 	push es
 	push ds
+	call YKEnterISR
 	sti
-	call tick
+	call YKTickHandler
 	cli
+	call YKExitISR
 	mov	al, 0x20
 	out	0x20, al
 	pop ds
@@ -61,9 +66,11 @@ tickRoutine:
 	push bp
 	push es
 	push ds
+	call YKEnterISR
 	sti
 	call key
 	cli
+	call YKExitISR
 	mov	al, 0x20
 	out	0x20, al
 	pop ds

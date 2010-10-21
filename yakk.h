@@ -1,4 +1,4 @@
-#define TASK_ARRAY_SIZE 100
+#define TASK_ARRAY_SIZE 10
 #define IDLESTACKSIZE 256
 
 typedef struct {
@@ -28,7 +28,7 @@ typedef struct {
 	int state;//ready = 1, not ready = 0
 	int first_time; //=1 if it hasn't run yet. = 0 if it has.
 	int tickNum;
-
+	unsigned char priority;
 	void (* task)();
 } TCB;
 
@@ -39,7 +39,7 @@ void Idle(void);
 void YKNewTask(void (* task)(void),void *taskStack, unsigned char priority);
 void YKRun();
 void YKDelayTask(unsigned count);
-void YKEnterMutex();
+int YKEnterMutex();
 void YKExitMutex();
 void YKEnterISR();
 void YKExitISR();
