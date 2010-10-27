@@ -21,7 +21,7 @@ void YKInitialize(){
 	YKCtxSwCount = 0;
 	isrdepth = 0;
 	NumTasks = 0;
-	YKNewTask(Idle, (void *) &IdleStk[IDLESTACKSIZE], 2);
+	YKNewTask(Idle, (void *) &IdleStk[IDLESTACKSIZE], 100);
 //	current_task = &tasks[99];
 }
 
@@ -31,10 +31,12 @@ void YKInitialize(){
 //}
 void Dummy(){}
 void YKNewTask(void (* task)(void),void *taskStack, unsigned char priority){
+	int ireg;
 	int i;
 	int j;
 	TCB tmpTCB;
 	TCB * newTCB = &tmpTCB;
+	ireg = YKEnterMutex();
 	newTCB->task = task;
 	newTCB->id = id_counter++;
 	newTCB->state = 1;
@@ -72,6 +74,7 @@ void YKNewTask(void (* task)(void),void *taskStack, unsigned char priority){
 	// initialize variables in TCB
 	//tasks[priority] = *newTCB;
 	NumTasks++;
+	if (ireg) YKExitMutex();
 	if (running) YKScheduler();
 }
 void YKRun(){
@@ -80,9 +83,16 @@ void YKRun(){
 		YKScheduler();
 }
 void YKDelayTask(unsigned count){
+	//John added this code
+	int ireg;
+	ireg = YKEnterMutex();
+	//end John code
 	current_task->tickNum = YKTickNum +count;
 	current_task->state = 0;
 	YKScheduler();
+	//John added this code
+	if(ireg) YKExitMutex();
+	//end John code
 
 }
 int YKEnterMutex(){
@@ -97,14 +107,16 @@ void YKExitMutex(){
 	asm("sti");
 }
 void YKEnterISR(){
-	if (!isrdepth){
+	//John added && running
+	if (!isrdepth && running){
 		saveContext(&current_task->context);
 	}
 	isrdepth++;
 }
 void YKExitISR(){
 	isrdepth--;
-	if (!isrdepth){
+	//John added the && running
+	if (!isrdepth && running){
 		YKScheduler();
 	}
 }
@@ -254,6 +266,7 @@ void restoreContext(Context * context) {
 
 void YKTickHandler() {
 	int i;
+	//John tried disabling interrupts here, but it didn't help, so he removed the code he added.
 	printNewLine();
 	printString("TICK ");       // Print string
 	printUInt(++YKTickNum);

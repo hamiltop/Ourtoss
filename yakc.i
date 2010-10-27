@@ -91,10 +91,12 @@ void YKInitialize(){
 
 void Dummy(){}
 void YKNewTask(void (* task)(void),void *taskStack, unsigned char priority){
+ int ireg;
  int i;
  int j;
  TCB tmpTCB;
  TCB * newTCB = &tmpTCB;
+ ireg = YKEnterMutex();
  newTCB->task = task;
  newTCB->id = id_counter++;
  newTCB->state = 1;
@@ -132,6 +134,7 @@ void YKNewTask(void (* task)(void),void *taskStack, unsigned char priority){
 
 
  NumTasks++;
+ if (ireg) YKExitMutex();
  if (running) YKScheduler();
 }
 void YKRun(){
@@ -140,9 +143,16 @@ void YKRun(){
   YKScheduler();
 }
 void YKDelayTask(unsigned count){
+
+
+
+
  current_task->tickNum = YKTickNum +count;
  current_task->state = 0;
  YKScheduler();
+
+
+
 
 }
 int YKEnterMutex(){
@@ -157,14 +167,16 @@ void YKExitMutex(){
  asm("sti");
 }
 void YKEnterISR(){
- if (!isrdepth){
+
+ if (!isrdepth && running){
   saveContext(&current_task->context);
  }
  isrdepth++;
 }
 void YKExitISR(){
  isrdepth--;
- if (!isrdepth){
+
+ if (!isrdepth && running){
   YKScheduler();
  }
 }
@@ -172,8 +184,12 @@ void YKScheduler() {
  int i;
  TCB * task_to_execute;
  int ireg;
+ printString("Entered Scheduler\n");
  ireg = YKEnterMutex();
  for(i=0;i<NumTasks;i++) {
+  printString("Checking State on task ");
+  printUInt(i);
+  printString("\n");
   if(tasks[i].state == 1) {
    task_to_execute = &tasks[i];
    break;
@@ -314,6 +330,7 @@ void restoreContext(Context * context) {
 
 void YKTickHandler() {
  int i;
+
  printNewLine();
  printString("TICK ");
  printUInt(++YKTickNum);
