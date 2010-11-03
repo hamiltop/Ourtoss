@@ -184,12 +184,8 @@ void YKScheduler() {
  int i;
  TCB * task_to_execute;
  int ireg;
- printString("Entered Scheduler\n");
  ireg = YKEnterMutex();
  for(i=0;i<NumTasks;i++) {
-  printString("Checking State on task ");
-  printUInt(i);
-  printString("\n");
   if(tasks[i].state == 1) {
    task_to_execute = &tasks[i];
    break;
